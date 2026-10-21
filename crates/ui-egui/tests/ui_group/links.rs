@@ -1,5 +1,5 @@
 //! Community links: the Discord button is one click away everywhere; Help menu, About dialog and
-//! home screen open the ArtCraft and PdfCraft pages.
+//! home screen open the ArtCraft and Command PDF pages.
 
 use egui_kittest::Harness;
 use egui_kittest::kittest::Queryable;
@@ -30,12 +30,12 @@ fn discord_button_in_the_top_bar_opens_discord() {
 fn home_screen_links() {
     for (label, url) in [
         ("Join our Discord", links::DISCORD),
-        ("PdfCraft web page", "https://getartcraft.com/apps/pdfcraft"),
-        ("PdfCraft on GitHub", "https://github.com/storytold/pdfcraft"),
+        ("Command PDF web page", "https://getartcraft.com/apps/pdfcraft"),
+        ("Command PDF on GitHub", "https://github.com/storytold/pdfcraft"),
         ("ArtCraft website", "https://getartcraft.com"),
     ] {
         let mut h = harness(|_| {});
-        h.get_by_label("Join the ArtCraft community");
+        h.get_by_label("Command PDF pilot");
         h.get_by_label(label).click();
         h.run_steps(2);
         assert_eq!(h.state().last_opened_url.as_deref(), Some(url), "{label}");

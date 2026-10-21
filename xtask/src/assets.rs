@@ -241,7 +241,8 @@ pub fn check(root: &Path, m: &Manifest, repo_files: &[String], lock: &BTreeSet<(
         if !seen.insert(a.path.clone()) {
             problems.push(format!("{}: listed twice", a.path));
         }
-        let brand = a.licence == BRAND_LICENCE && a.kind == "logo" && a.path.starts_with("docs/brand/");
+        let brand = (a.licence == BRAND_LICENCE && a.kind == "logo" && a.path.starts_with("docs/brand/"))
+            || (a.licence == "LicenseRef-MCM-Trademark" && (a.path.starts_with("docs/brand/command-") || matches!(a.path.as_str(), "assets/app-icon/pdfcraft.ico" | "assets/app-icon/pdfcraft-document.ico" | "assets/app-icon/pdfcraft-1024.png")));
         if !brand {
             licence_ok(&a.path, &a.licence, &mut problems);
         }

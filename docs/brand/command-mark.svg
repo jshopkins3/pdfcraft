@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-labelledby="command-app-icon-title">
+  <title id="command-app-icon-title">Command</title>
+  <rect width="512" height="512" rx="112" fill="#252428"/>
+  <path d="M464 32H232C116 32 32 128 32 256S116 480 232 480H464L412 352H268C212 352 168 312 168 256S212 160 268 160H412Z" fill="#fff"/>
+</svg>

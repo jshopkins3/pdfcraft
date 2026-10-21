@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 176" role="img" aria-labelledby="command-lockup-title command-lockup-description">
+  <title id="command-lockup-title">Command</title>
+  <desc id="command-lockup-description">The clean Command C and COMMAND wordmark.</desc>
+  <g transform="translate(32 24)" aria-hidden="true">
+    <path d="M116 8H58C29 8 8 32 8 64S29 120 58 120H116L103 88H67C53 88 42 78 42 64S53 40 67 40H103Z" fill="#252428"/>
+  </g>
+  <text x="168" y="104" fill="#111214" font-family="Bahnschrift, Arial Narrow, Segoe UI, Arial, sans-serif" font-size="42" font-weight="700" letter-spacing="7">COMMAND</text>
+</svg>

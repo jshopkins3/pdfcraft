@@ -1,0 +1,89 @@
+name: Command PDF Windows pilot
+on:
+  push:
+    branches: [feat/command-pdf-windows-pilot]
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: command-pdf-pilot-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  windows:
+    runs-on: windows-2025
+    timeout-minutes: 100
+    env:
+      CARGO_BUILD_JOBS: 2
+      CARGO_PROFILE_RELEASE_LTO: 'false'
+      CARGO_PROFILE_RELEASE_CODEGEN_UNITS: 16
+      PDFCRAFT_REQUIRE_WINRES: 1
+      PDFCRAFT_SYSTEM_FONTS: 0
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          repository: storytold/craft-fonts
+          ref: 3d9ab3a132ed0eff457e424226a435a901da30d3
+          path: craft-fonts
+      - uses: dtolnay/rust-toolchain@686976e191b89faba57d3206551f0f330d8cb249
+        with:
+          toolchain: '1.95.0'
+          components: rustfmt, clippy
+      - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6
+        with:
+          key: command-pdf-x64
+      - name: Configure optional fonts and installer tools
+        shell: pwsh
+        run: |
+          "CRAFT_FONTS_DIR=$env:GITHUB_WORKSPACE/craft-fonts" >> $env:GITHUB_ENV
+          dotnet tool install --global wix --version 5.0.2
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: Format and record source-only formatting patch
+        shell: pwsh
+        run: |
+          cargo fmt --all
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          git diff --binary --output=format.patch
+      - name: Validate asset provenance and layering
+        shell: pwsh
+        run: |
+          cargo xtask assets --write
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          cargo xtask assets
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          cargo xtask layers
+          exit $LASTEXITCODE
+      - name: Build x64 app, CLI and installer; inspect compiled MSI
+        shell: pwsh
+        run: |
+          ./packaging/windows/package.ps1 -Arch x64
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: Installer lifecycle and independent PDF smoke test
+        shell: pwsh
+        run: ./packaging/windows/pilot-acceptance.ps1
+      - name: Focused Rust checks
+        shell: pwsh
+        run: |
+          cargo test --locked -p pdfcraft -p pdfcraft-engine -p pdfcraft-automation -j 2
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          cargo clippy --locked -p pdfcraft -p pdfcraft-ui-egui -p pdfcraft-engine -p pdfcraft-automation --all-targets -j 2 -- -D warnings
+          exit $LASTEXITCODE
+      - name: Collect reproducible candidate receipt
+        if: always()
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force dist/release | Out-Null
+          git rev-parse HEAD | Set-Content dist/release/source-commit.txt
+          rustc --version | Set-Content dist/release/toolchain.txt
+          Copy-Item format.patch dist/release/ -ErrorAction SilentlyContinue
+          Copy-Item ATTRIBUTION.md dist/release/ -ErrorAction SilentlyContinue
+          Get-ChildItem dist/release -File | Where-Object { $_.Extension -in '.msi','.zip' } | ForEach-Object {
+            $h=Get-FileHash $_.FullName -Algorithm SHA256
+            "$($h.Hash.ToLowerInvariant())  $($_.Name)"
+          } | Set-Content dist/release/SHA256SUMS.txt
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: command-pdf-x64-pilot-candidate
+          path: dist/release/
+          retention-days: 30
