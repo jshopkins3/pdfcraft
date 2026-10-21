@@ -35,7 +35,9 @@ Original amount: 123.45
     @{tool='doc_save';args=@{doc=1;path='edited.pdf'}},
     @{tool='doc_open';args=@{path='edited.pdf'}},
     @{tool='doc_print';args=@{doc=2;path='print-ready.pdf';paper='Letter';layout='fit'}},
-    @{tool='page_render';args=@{doc=2;page=1;dpi=96};out='edited.png'}
+    @{tool='page_render';args=@{doc=2;page=1;dpi=96};out='edited.png'},
+    @{tool='text_find';args=@{doc=2;query='Original amount'}},
+    @{tool='doc_combine';args=@{paths=@('original.pdf','edited.pdf');out='combined.pdf';open=$false}}
   )
   $steps | ConvertTo-Json -Depth 8 | Set-Content (Join-Path $work 'steps.json')
   # The CLI's own discoverable schema is retained as evidence, never assumed from README names.
@@ -49,7 +51,7 @@ Original amount: 123.45
   if ($LASTEXITCODE -ne 0) { throw 'Independent PDF reader installation failed' }
   $env:COMMAND_PDF_FIXTURE=$work
   @'
-import os
+import os, json
 from pathlib import Path
 from pypdf import PdfReader
 p=Path(os.environ['COMMAND_PDF_FIXTURE'])
@@ -62,7 +64,14 @@ assert edited.get_fields()['PilotReviewer']['/V']=='MCM synthetic reviewer'
 assert any(a.get_object().get('/Contents')=='Synthetic pilot review' for a in edited.pages[0]['/Annots'])
 assert (p/'edited.png').stat().st_size>1000
 assert len(PdfReader(p/'print-ready.pdf').pages)==1
-print('Independent pypdf: page count, original unchanged, rotation, text, filled form, comment and print-ready output passed')
+combined=PdfReader(p/'combined.pdf')
+assert len(combined.pages)==2
+assert combined.pages[0].get('/Rotate',0)==0
+assert combined.pages[1].get('/Rotate',0)==90
+report=json.loads((p.parent/'engine-roundtrip.json').read_text(encoding='utf-8-sig'))
+search=next(s['result'] for s in report['steps'] if s['tool']=='text_find')
+assert len(search['matches'])>=1
+print('Independent pypdf: page count, original unchanged, rotation, text, filled form, comment, combine, search and print-ready output passed')
 '@ | python - | Set-Content (Join-Path $out 'independent-readback.txt')
   if ($LASTEXITCODE -ne 0) { throw 'Independent PDF readback failed' }
   $receipt.steps += 'independent pypdf readback passed'
