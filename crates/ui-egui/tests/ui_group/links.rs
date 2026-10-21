@@ -20,7 +20,7 @@ fn harness(setup: impl FnOnce(&mut PdfCraftApp) + 'static) -> Harness<'static, P
 #[test]
 fn help_button_in_the_top_bar_opens_command_help() {
     let mut h = harness(|_| {});
-    h.get_by_label("Help").click();
+    h.get_by_label("Get help").click();
     h.run_steps(2);
     assert_eq!(h.state().last_opened_url.as_deref(), Some(links::DISCORD));
     assert_eq!(links::DISCORD, "https://command.mychomeloans.com/lobby?help=it");

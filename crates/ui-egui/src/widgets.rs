@@ -499,7 +499,7 @@ pub fn progress_notice(app: &PdfCraftApp, ctx: &egui::Context) -> bool {
     cancel
 }
 
-/// The ArtCraft wordmark (Storyteller's brand, docs/brand/; not open source), sized to `height`.
+/// The approved Command mark, sized to `height`; used only in this branded fork.
 pub fn artcraft_logo(ui: &mut egui::Ui, height: f32) -> Response {
     let dark = ui.visuals().dark_mode;
     let (uri, bytes): (&str, &'static [u8]) = if dark {
@@ -510,7 +510,7 @@ pub fn artcraft_logo(ui: &mut egui::Ui, height: f32) -> Response {
     ui.add(egui::Image::from_bytes(uri, bytes).max_height(height).alt_text("Command"))
 }
 
-/// The ArtCraft mark (brand blue, works on light and dark), `size` points square.
+/// The approved Command app mark, `size` points square.
 pub fn artcraft_mark(ui: &mut egui::Ui, size: f32) -> Response {
     ui.add(
         egui::Image::from_bytes("bytes://command-mark.svg", include_bytes!("../../../docs/brand/command-mark.svg"))
