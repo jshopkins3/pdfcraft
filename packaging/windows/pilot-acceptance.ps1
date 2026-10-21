@@ -69,7 +69,7 @@ assert len(combined.pages)==2
 assert combined.pages[0].get('/Rotate',0)==0
 assert combined.pages[1].get('/Rotate',0)==90
 report=json.loads((p.parent/'engine-roundtrip.json').read_text(encoding='utf-8-sig'))
-search=next(s['result'] for s in report['steps'] if s['tool']=='text_find')
+search=next(s['result'][0] for s in report['steps'] if s['tool']=='text_find')
 assert len(search['matches'])>=1
 print('Independent pypdf: page count, original unchanged, rotation, text, filled form, comment, combine, search and print-ready output passed')
 '@ | python - | Set-Content (Join-Path $out 'independent-readback.txt')
