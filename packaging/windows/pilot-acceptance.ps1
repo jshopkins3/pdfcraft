@@ -28,6 +28,8 @@ Original amount: 123.45
   $steps=@(
     @{tool='doc_create';args=@{from='text';path='fixture.txt'}},
     @{tool='doc_save';args=@{doc=1;path='original.pdf'}},
+    @{tool='form_add_field';args=@{doc=1;page=1;type='text';name='PilotReviewer';rect=@(50,130,250,155)}},
+    @{tool='form_fill';args=@{doc=1;values=@{PilotReviewer='MCM synthetic reviewer'}}},
     @{tool='page_rotate';args=@{doc=1;pages=@(1);degrees=90}},
     @{tool='comment_add';args=@{doc=1;page=1;type='note';at=@(50,50);contents='Synthetic pilot review'}},
     @{tool='doc_save';args=@{doc=1;path='edited.pdf'}},
@@ -55,9 +57,10 @@ assert len(original.pages)==len(edited.pages)==1
 assert original.pages[0].get('/Rotate',0)==0
 assert edited.pages[0].get('/Rotate',0)==90
 assert 'Original amount: 123.45' in edited.pages[0].extract_text()
+assert edited.get_fields()['PilotReviewer']['/V']=='MCM synthetic reviewer'
 assert any(a.get_object().get('/Contents')=='Synthetic pilot review' for a in edited.pages[0]['/Annots'])
 assert (p/'edited.png').stat().st_size>1000
-print('Independent pypdf: page count, original unchanged, rotation, text and comment passed')
+print('Independent pypdf: page count, original unchanged, rotation, text, filled form and comment passed')
 '@ | python - | Set-Content (Join-Path $out 'independent-readback.txt')
   if ($LASTEXITCODE -ne 0) { throw 'Independent PDF readback failed' }
   $receipt.steps += 'independent pypdf readback passed'

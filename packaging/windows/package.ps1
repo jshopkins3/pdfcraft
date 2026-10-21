@@ -94,6 +94,15 @@ foreach ($f in 'LICENSE-MIT', 'LICENSE-APACHE', 'NOTICE') {
   Copy-Item (Join-Path $Root $f) $Stage
 }
 Copy-Item (Join-Path $Root 'assets\app-icon\LICENSE-document.txt') $Stage
+$Licenses = Join-Path $Stage 'licenses'
+New-Item -ItemType Directory -Force $Licenses | Out-Null
+Copy-Item (Join-Path $Root 'docs/brand/LICENSE-command.txt'), (Join-Path $Root 'ATTRIBUTION.md') $Licenses
+if ($env:CRAFT_FONTS_DIR) {
+  Get-ChildItem (Join-Path $env:CRAFT_FONTS_DIR 'fonts') -Directory | ForEach-Object {
+    $ofl = Join-Path $_.FullName 'OFL.txt'
+    if (Test-Path $ofl) { Copy-Item $ofl (Join-Path $Licenses "OFL-$($_.Name).txt") }
+  }
+}
 
 & (Join-Path $PSScriptRoot 'sign.ps1') (Join-Path $Stage 'command-pdf.exe') (Join-Path $Stage 'command-pdf-cli.exe')
 
@@ -133,6 +142,7 @@ foreach ($f in 'NOTICE', 'LICENSE-document.txt') {
   Copy-Item (Join-Path $Stage $f) $Portable
 }
 Copy-Item -Recurse $Models (Join-Path $Portable 'models')
+Copy-Item -Recurse $Licenses (Join-Path $Portable 'licenses')
 foreach ($f in 'README.md', 'LICENSE', 'LICENSE-MIT', 'LICENSE-APACHE') {
   $p = Join-Path $Root $f
   if (Test-Path $p) { Copy-Item $p $Portable }
