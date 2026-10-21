@@ -34,6 +34,7 @@ Original amount: 123.45
     @{tool='comment_add';args=@{doc=1;page=1;type='note';at=@(50,50);contents='Synthetic pilot review'}},
     @{tool='doc_save';args=@{doc=1;path='edited.pdf'}},
     @{tool='doc_open';args=@{path='edited.pdf'}},
+    @{tool='doc_print';args=@{doc=2;path='print-ready.pdf';paper='Letter';layout='fit'}},
     @{tool='page_render';args=@{doc=2;page=1;dpi=96};out='edited.png'}
   )
   $steps | ConvertTo-Json -Depth 8 | Set-Content (Join-Path $work 'steps.json')
@@ -60,7 +61,8 @@ assert 'Original amount: 123.45' in edited.pages[0].extract_text()
 assert edited.get_fields()['PilotReviewer']['/V']=='MCM synthetic reviewer'
 assert any(a.get_object().get('/Contents')=='Synthetic pilot review' for a in edited.pages[0]['/Annots'])
 assert (p/'edited.png').stat().st_size>1000
-print('Independent pypdf: page count, original unchanged, rotation, text, filled form and comment passed')
+assert len(PdfReader(p/'print-ready.pdf').pages)==1
+print('Independent pypdf: page count, original unchanged, rotation, text, filled form, comment and print-ready output passed')
 '@ | python - | Set-Content (Join-Path $out 'independent-readback.txt')
   if ($LASTEXITCODE -ne 0) { throw 'Independent PDF readback failed' }
   $receipt.steps += 'independent pypdf readback passed'
