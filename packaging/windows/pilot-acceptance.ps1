@@ -17,6 +17,11 @@ try {
   if (-not (Test-Path $cli)) { throw "Installed CLI missing: $cli" }
   $sig=Get-AuthenticodeSignature (Join-Path $folder 'command-pdf.exe')
   $receipt.signature=$sig.Status.ToString()
+  if ($env:COMMAND_PDF_REQUIRE_SIGNING -eq '1' -and $sig.Status -ne 'Valid') { throw 'Installed executable signature is not valid' }
+  foreach ($license in 'LICENSE-command.txt','ATTRIBUTION.md') {
+    if (-not (Test-Path (Join-Path $folder "licenses/$license"))) { throw "Installed license missing: $license" }
+  }
+  $receipt.steps += 'installed branding license and asset notices present'
   if ((Get-Item (Join-Path $folder 'command-pdf.exe')).VersionInfo.ProductName -ne 'Command PDF') { throw 'Executable has the wrong product name' }
   $receipt.steps += 'installed executable branding passed'
   $work=Join-Path $out 'synthetic'; New-Item -ItemType Directory -Force $work | Out-Null
