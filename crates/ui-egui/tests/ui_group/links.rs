@@ -36,7 +36,7 @@ fn home_screen_links() {
     ] {
         let mut h = harness(|_| {});
         h.get_by_label("Command PDF pilot");
-        h.get_by_label(label).click();
+        h.get_by_role_and_label(egui::accesskit::Role::Button, label).click();
         h.run_steps(2);
         assert_eq!(h.state().last_opened_url.as_deref(), Some(url), "{label}");
     }
