@@ -40,7 +40,9 @@ pub fn show(app: &mut PdfCraftApp, ui: &mut egui::Ui) {
                         widgets::artcraft_mark(ui, 28.0);
                         ui.vertical(|ui| {
                             ui.label(egui::RichText::new(tl!("Command PDF pilot")).font(theme::semibold(15.0)));
-                            ui.label(egui::RichText::new(tl!("Use copies of your files during the pilot. Get help through Command.")).color(t.text_muted));
+                            ui.label(
+                                egui::RichText::new(tl!("Use copies of your files during the pilot. Get help through Command.")).color(t.text_muted),
+                            );
                         });
                     });
                     ui.add_space(8.0);
