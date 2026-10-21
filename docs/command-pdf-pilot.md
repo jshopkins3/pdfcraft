@@ -11,3 +11,7 @@ Reference: preserve the existing PdfCraft desktop layout and tools, use approved
 Updates are manual and user-requested, restricted to the fork's releases. Never send users to upstream installers. No release published by CI. An unsigned candidate is test-only; signing and actual Windows acceptance are separate receipts. Keep Acrobat and original documents.
 
 Acceptance: install/repair/upgrade/uninstall; no forced default association; no shared upstream profile; view/search; rotate/combine; form fill; comments; save/reopen in independent reader; print; 100/150/200 percent scaling. Physical printing is a separate hardware check.
+
+The GitHub candidate workflow uploads test artifacts only. It does not create a release or an Intra-Lounge link. A successful job is CI evidence; it does not establish physical printer output, Windows desktop appearance, or signing trust on employee PCs. The manual update destination is the fork's releases page; no approved release exists there during preparation.
+
+Pilot rollback: uninstall Command PDF using Windows Installed apps, keep Acrobat and all original files, and reinstall only the last approved Command PDF MSI if needed. The installer offers Open with and never forces itself as the default reader. Existing PdfCraft profiles and recovery files remain separate.
