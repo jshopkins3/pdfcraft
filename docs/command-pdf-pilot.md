@@ -15,3 +15,5 @@ Acceptance: install/repair/upgrade/uninstall; no forced default association; no 
 The GitHub candidate workflow uploads test artifacts only. It does not create a release or an Intra-Lounge link. A successful job is CI evidence; it does not establish physical printer output, Windows desktop appearance, or signing trust on employee PCs. The manual update destination is the fork's releases page; no approved release exists there during preparation.
 
 Pilot rollback: uninstall Command PDF using Windows Installed apps, keep Acrobat and all original files, and reinstall only the last approved Command PDF MSI if needed. The installer offers Open with and never forces itself as the default reader. Existing PdfCraft profiles and recovery files remain separate.
+
+Command help opens the authenticated Intra-Lounge home page, where company contacts are available. The desktop pilot does not create a new support intake or promise an IT-specific form. The destination was inspected in the signed-in browser; an unsupported `help=it` query was removed.

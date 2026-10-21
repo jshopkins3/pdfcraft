@@ -7,7 +7,7 @@ use std::path::{Path, PathBuf};
 /// The app's name in ArtCraft URLs (`getartcraft.com/apps/{APP}`, `github.com/storytold/{APP}`).
 pub const APP: &str = "pdfcraft";
 
-pub const DISCORD: &str = "https://command.mychomeloans.com/lobby?help=it";
+pub const DISCORD: &str = "https://command.mychomeloans.com/lobby";
 pub const WEBSITE: &str = "https://command.mychomeloans.com";
 pub const APP_PAGE: &str = "https://command.mychomeloans.com/lobby";
 pub const GITHUB: &str = "https://github.com/jshopkins3/pdfcraft";

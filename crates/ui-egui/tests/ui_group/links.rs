@@ -23,7 +23,7 @@ fn help_button_in_the_top_bar_opens_command_help() {
     h.get_by_label("Get help").click();
     h.run_steps(2);
     assert_eq!(h.state().last_opened_url.as_deref(), Some(links::DISCORD));
-    assert_eq!(links::DISCORD, "https://command.mychomeloans.com/lobby?help=it");
+    assert_eq!(links::DISCORD, "https://command.mychomeloans.com/lobby");
 }
 
 #[test]
