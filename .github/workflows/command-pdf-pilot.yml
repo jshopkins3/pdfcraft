@@ -41,16 +41,18 @@ jobs:
           "CRAFT_FONTS_DIR=$env:GITHUB_WORKSPACE/craft-fonts" >> $env:GITHUB_ENV
           dotnet tool install --global wix --version 5.0.2
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-      - name: Format and record source-only formatting patch
+      - name: Check committed source formatting
         shell: pwsh
         run: |
-          cargo fmt --all
+          cargo fmt --all -- --check
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           git diff --binary --output=format.patch
       - name: Validate asset provenance and layering
         shell: pwsh
         run: |
           cargo xtask assets --write
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          git diff --exit-code -- ATTRIBUTION.md
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           cargo xtask assets
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
