@@ -60,6 +60,9 @@ if (-not $haveCert -and -not $haveAzure) {
   Write-Warn "Windows signing secrets not set (WINDOWS_CERTIFICATE or AZURE_*): leaving unsigned: $($Files -join ', ')"
   exit 0
 }
+if ($env:COMMAND_PDF_REQUIRE_SIGNING -eq '1' -and -not $env:COMMAND_PDF_EXPECTED_PUBLISHER) {
+  throw 'Required signing needs COMMAND_PDF_EXPECTED_PUBLISHER set to the validated certificate subject'
+}
 
 $script:SignTool = Find-SignTool
 $common = @('sign', '/v', '/fd', 'SHA256', '/td', 'SHA256', '/d', 'Command PDF', '/du', 'https://github.com/jshopkins3/pdfcraft')
@@ -109,6 +112,13 @@ try {
     Invoke-SignTool ($common + @('/tr', $ts, '/dlib', $dlib.FullName, '/dmdf', $metadata) + $Files)
   }
   Invoke-SignTool (@('verify', '/pa', '/v') + $Files)
+  foreach ($signedFile in $Files) {
+    $signature = Get-AuthenticodeSignature $signedFile
+    if ($signature.Status -ne 'Valid' -or -not $signature.TimeStamperCertificate) { throw "Signature or timestamp invalid: $signedFile" }
+    if ($env:COMMAND_PDF_EXPECTED_PUBLISHER -and $signature.SignerCertificate.Subject -ne $env:COMMAND_PDF_EXPECTED_PUBLISHER) {
+      throw "Signed publisher differs from the validated MCM subject: $signedFile"
+    }
+  }
 }
 finally {
   Remove-Item -LiteralPath $tmp -Recurse -Force -ErrorAction SilentlyContinue

@@ -18,6 +18,15 @@ try {
   $sig=Get-AuthenticodeSignature (Join-Path $folder 'command-pdf.exe')
   $receipt.signature=$sig.Status.ToString()
   if ($env:COMMAND_PDF_REQUIRE_SIGNING -eq '1' -and $sig.Status -ne 'Valid') { throw 'Installed executable signature is not valid' }
+  if ($env:COMMAND_PDF_REQUIRE_SIGNING -eq '1') {
+    if (-not $env:COMMAND_PDF_EXPECTED_PUBLISHER) { throw 'Expected validated publisher is missing' }
+    foreach ($binary in 'command-pdf.exe','command-pdf-cli.exe') {
+      $installedSignature=Get-AuthenticodeSignature (Join-Path $folder $binary)
+      if ($installedSignature.Status -ne 'Valid' -or $installedSignature.SignerCertificate.Subject -ne $env:COMMAND_PDF_EXPECTED_PUBLISHER) {
+        throw "Installed publisher or signature mismatch: $binary"
+      }
+    }
+  }
   foreach ($license in 'LICENSE-command.txt','ATTRIBUTION.md') {
     if (-not (Test-Path (Join-Path $folder "licenses/$license"))) { throw "Installed license missing: $license" }
   }
