@@ -68,6 +68,8 @@ jobs:
         run: |
           cargo test --locked -p pdfcraft -p pdfcraft-engine -p pdfcraft-automation -j 2
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          cargo test --locked -p pdfcraft-ui-egui --test ui links:: -j 2 -- --test-threads=1
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           cargo clippy --locked -p pdfcraft -p pdfcraft-ui-egui -p pdfcraft-engine -p pdfcraft-automation --all-targets -j 2 -- -D warnings
           exit $LASTEXITCODE
       - name: Collect reproducible candidate receipt
