@@ -16,6 +16,7 @@ jobs:
       CARGO_BUILD_JOBS: 2
       CARGO_PROFILE_RELEASE_LTO: 'false'
       CARGO_PROFILE_RELEASE_CODEGEN_UNITS: 16
+      CARGO_TARGET_X86_64_PC_WINDOWS_MSVC_RUSTFLAGS: -C target-feature=+crt-static
       PDFCRAFT_REQUIRE_WINRES: 1
       PDFCRAFT_SYSTEM_FONTS: 0
       PDFCRAFT_BUILD_LABEL: MCM pilot 1
@@ -66,11 +67,11 @@ jobs:
       - name: Focused Rust checks
         shell: pwsh
         run: |
-          cargo test --locked -p pdfcraft -p pdfcraft-engine -p pdfcraft-automation -j 2
+          cargo test --release --target x86_64-pc-windows-msvc --locked -p pdfcraft -p pdfcraft-engine -p pdfcraft-automation -j 2
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-          cargo test --locked -p pdfcraft-ui-egui --test ui links:: -j 2 -- --test-threads=1
+          cargo test --release --target x86_64-pc-windows-msvc --locked -p pdfcraft-ui-egui --test ui links:: -j 2 -- --test-threads=1
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-          cargo clippy --locked -p pdfcraft -p pdfcraft-ui-egui -p pdfcraft-engine -p pdfcraft-automation --all-targets -j 2 -- -D warnings
+          cargo clippy --release --target x86_64-pc-windows-msvc --locked -p pdfcraft -p pdfcraft-ui-egui -p pdfcraft-engine -p pdfcraft-automation --all-targets -j 2 -- -D warnings
           exit $LASTEXITCODE
       - name: Collect reproducible candidate receipt
         if: always()
