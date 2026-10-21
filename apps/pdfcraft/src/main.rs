@@ -46,7 +46,9 @@ mod updates;
 mod windows_manifest;
 
 /// Freedesktop app id: the `.desktop` file name and the hicolor icon name.
-const APP_ID: &str = "com.mychomeloans.commandpdf";
+// This fork ships Windows only. Keep the other launchers' existing identity coherent.
+const NON_WINDOWS_APP_ID: &str = "ai.storyteller.pdfcraft";
+const APP_ID: &str = if cfg!(windows) { "com.mychomeloans.commandpdf" } else { NON_WINDOWS_APP_ID };
 
 /// The app icon (assets/app-icon/README.md). macOS gets the version on Apple's icon grid, with a
 /// transparent margin; Windows and Linux get the full-bleed tile.
@@ -1364,6 +1366,8 @@ mod tests {
     fn the_desktop_entry_names_the_window_class() {
         let entry = include_str!("../../../packaging/linux/ai.storyteller.pdfcraft.desktop");
         let class = entry.lines().find_map(|line| line.strip_prefix("StartupWMClass="));
+        assert_eq!(class, Some(super::NON_WINDOWS_APP_ID));
+        #[cfg(not(windows))]
         assert_eq!(class, Some(super::APP_ID));
     }
 }
