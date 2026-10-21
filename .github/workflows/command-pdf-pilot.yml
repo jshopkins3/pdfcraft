@@ -71,7 +71,12 @@ jobs:
         run: |
           cargo test --release --target x86_64-pc-windows-msvc --locked -p pdfcraft -p pdfcraft-engine -p pdfcraft-automation -j 2
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-          cargo test --release --target x86_64-pc-windows-msvc --locked -p pdfcraft-ui-egui --test ui links:: -j 2 -- --test-threads=1
+          $linkListing = & cargo test --release --target x86_64-pc-windows-msvc --locked -p pdfcraft-ui-egui --test ui_group links:: -j 2 -- --list
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          Write-Output $linkListing
+          $selectedLinks = @($linkListing | Where-Object { $_ -match '^links::.+: test$' })
+          if ($selectedLinks.Count -lt 5) { throw "Expected at least five interface-link tests; selected $($selectedLinks.Count)" }
+          cargo test --release --target x86_64-pc-windows-msvc --locked -p pdfcraft-ui-egui --test ui_group links:: -j 2 -- --test-threads=1
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           cargo clippy --release --target x86_64-pc-windows-msvc --locked -p pdfcraft -p pdfcraft-ui-egui -p pdfcraft-engine -p pdfcraft-automation --all-targets -j 2 -- -D warnings
           exit $LASTEXITCODE
