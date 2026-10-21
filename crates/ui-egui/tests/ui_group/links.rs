@@ -18,6 +18,17 @@ fn harness(setup: impl FnOnce(&mut PdfCraftApp) + 'static) -> Harness<'static, P
 }
 
 #[test]
+fn command_sign_button_opens_signing_without_sending_a_document() {
+    let mut h = harness(|app| {
+        app.set_option("mode", "sign").unwrap();
+        app.set_option("tool", "fill_sign").unwrap();
+    });
+    h.get_by_role_and_label(egui::accesskit::Role::Button, "Open Command Sign").click();
+    h.run_steps(2);
+    assert_eq!(h.state().last_opened_url.as_deref(), Some("https://sign.mychomeloans.com"));
+}
+
+#[test]
 fn help_button_in_the_top_bar_opens_command_help() {
     let mut h = harness(|_| {});
     h.get_by_label("Get help").click();

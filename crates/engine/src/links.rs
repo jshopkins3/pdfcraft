@@ -11,6 +11,7 @@ pub const DISCORD: &str = "https://command.mychomeloans.com/lobby";
 pub const WEBSITE: &str = "https://command.mychomeloans.com";
 pub const APP_PAGE: &str = "https://command.mychomeloans.com/lobby";
 pub const GITHUB: &str = "https://github.com/jshopkins3/pdfcraft";
+pub const COMMAND_SIGN: &str = "https://sign.mychomeloans.com";
 
 /// A link and the registry command that opens it.
 #[derive(Clone, Copy, Debug)]
@@ -24,6 +25,7 @@ pub struct Link {
 
 /// In the order they are shown. Discord comes first: it is where people get help fastest.
 pub const LINKS: &[Link] = &[
+    Link { command: "help.command_sign", label: "Open Command Sign", url: COMMAND_SIGN, icon: "external-link" },
     Link { command: "help.discord", label: "Command help", url: DISCORD, icon: "messages-square" },
     Link { command: "help.app_page", label: "Command PDF web page", url: APP_PAGE, icon: "globe" },
     Link { command: "help.github", label: "Command PDF on GitHub", url: GITHUB, icon: "code-xml" },
