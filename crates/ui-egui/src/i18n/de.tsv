@@ -69,7 +69,7 @@
 	Flatten Fill & Sign when saving	Ausfüllen und unterschreiben beim Speichern reduzieren
 	Text, marks and signatures become part of the page. Other comments stay editable.	Text, Markierungen und Unterschriften werden Teil der Seite. Andere Kommentare bleiben bearbeitbar.
 	OK	OK
-	Join our Discord	Unserem Discord beitreten
+	Command help	Unserem Discord beitreten
 	Close	Schließen
 	Next / previous match	Nächster / vorheriger Treffer
 	Copy selected text	Ausgewählten Text kopieren
@@ -284,10 +284,10 @@
 	Split document…	Dokument teilen…
 	Number pages…	Seiten nummerieren…
 	Keyboard shortcuts	Tastenkürzel
-	Join the ArtCraft Discord	Dem ArtCraft-Discord beitreten
+	Command help	Dem ArtCraft-Discord beitreten
 	Command PDF web page	Command PDF-Webseite
 	Command PDF on GitHub	Command PDF auf GitHub
-	ArtCraft website	ArtCraft-Website
+	Command	ArtCraft-Website
 	Check for updates…	Nach Updates suchen…
 	About Command PDF	Über Command PDF
 	Export a PDF	PDF exportieren

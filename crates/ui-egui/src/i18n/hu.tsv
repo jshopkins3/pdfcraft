@@ -67,7 +67,7 @@
 	Side panels	Oldalsó panelek
 	Enable Acrobat JavaScript	Acrobat JavaScript engedélyezése
 	OK	OK
-	Join our Discord	Csatlakozás a Discordhoz
+	Command help	Csatlakozás a Discordhoz
 	Close	Bezárás
 	Next / previous match	Következő / előző találat
 	Copy selected text	Kijelölt szöveg másolása
@@ -282,10 +282,10 @@
 	Split document…	Dokumentum felosztása…
 	Number pages…	Oldalak számozása…
 	Keyboard shortcuts	Billentyűparancsok
-	Join the ArtCraft Discord	Csatlakozás az ArtCraft Discordhoz
+	Command help	Csatlakozás az ArtCraft Discordhoz
 	Command PDF web page	A Command PDF weblapja
 	Command PDF on GitHub	Command PDF a GitHubon
-	ArtCraft website	Az ArtCraft webhelye
+	Command	Az ArtCraft webhelye
 	Check for updates…	Frissítések keresése…
 	About Command PDF	A PdfCraftról
 	Export a PDF	PDF exportálása

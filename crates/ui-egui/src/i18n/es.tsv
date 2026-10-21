@@ -92,7 +92,7 @@
 	Flatten Fill & Sign when saving	Acoplar Rellenar y firmar al guardar
 	Text, marks and signatures become part of the page. Other comments stay editable.	El texto, las marcas y las firmas pasan a formar parte de la página. Los demás comentarios siguen siendo editables.
 	OK	Aceptar
-	Join our Discord	Únete a nuestro Discord
+	Command help	Únete a nuestro Discord
 	Close	Cerrar
 	Next / previous match	Coincidencia siguiente / anterior
 	Copy selected text	Copiar el texto seleccionado
@@ -307,10 +307,10 @@
 	Split document…	Dividir documento…
 	Number pages…	Numerar páginas…
 	Keyboard shortcuts	Atajos de teclado
-	Join the ArtCraft Discord	Únete al Discord de ArtCraft
+	Command help	Únete al Discord de ArtCraft
 	Command PDF web page	Página web de Command PDF
 	Command PDF on GitHub	Command PDF en GitHub
-	ArtCraft website	Sitio web de ArtCraft
+	Command	Sitio web de ArtCraft
 	Check for updates…	Buscar actualizaciones…
 	About Command PDF	Acerca de Command PDF
 	Export a PDF	Exportar un PDF

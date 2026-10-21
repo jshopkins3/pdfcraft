@@ -235,7 +235,7 @@
 	Archive documents	Arhiviraj dokumente
 	Area	Ploščina
 	Arrow	Puščica
-	ArtCraft website	Spletna stran ArtCraft
+	Command	Spletna stran ArtCraft
 	Ask about this document	Vprašaj o tem dokumentu
 	Asks GitHub for the latest release. Nothing is downloaded or installed automatically.	Vpraša GitHub za najnovejšo izdajo. Ničesar se ne prenese ali namesti samodejno.
 	Associated with content	Povezano z vsebino
@@ -981,8 +981,8 @@
 	JavaScript console…	Konzola JavaScript…
 	JavaScript is turned off (Preferences ▸ JavaScript).	JavaScript je izklopljen (Nastavitve > JavaScript).
 	JavaScript, e.g. getField("total").value	JavaScript, npr. getField("total").value
-	Join our Discord	Discord kanal
-	Join the ArtCraft Discord	Pridružite se Discordu ArtCraft
+	Command help	Discord kanal
+	Command help	Pridružite se Discordu ArtCraft
 	Command PDF pilot	Pridružite se skupnosti ArtCraft
 	July	Julij
 	June	Junij

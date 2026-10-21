@@ -70,7 +70,7 @@
 	Side panels	Бүйірлік панельдер
 	Enable Acrobat JavaScript	Acrobat JavaScript-ті қосу
 	OK	ОК
-	Join our Discord	Discord-қа қосылыңыз
+	Command help	Discord-қа қосылыңыз
 	Close	Жабу
 	Next / previous match	Келесі / алдыңғы сәйкестік
 	Copy selected text	Таңдалған мәтінді көшіру
@@ -271,10 +271,10 @@
 	Split document…	Құжатты бөлу…
 	Number pages…	Беттерді нөмірлеу…
 	Keyboard shortcuts	Пернетақта тіркесімдері
-	Join the ArtCraft Discord	ArtCraft Discord-ына қосылыңыз
+	Command help	ArtCraft Discord-ына қосылыңыз
 	Command PDF web page	Command PDF веб-сайты
 	Command PDF on GitHub	GitHub-тағы Command PDF
-	ArtCraft website	ArtCraft веб-сайты
+	Command	ArtCraft веб-сайты
 	Check for updates…	Жаңартуларды тексеру…
 	About Command PDF	Command PDF туралы
 	Export a PDF	PDF экспорттау

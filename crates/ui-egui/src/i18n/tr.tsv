@@ -60,7 +60,7 @@
 	Flatten Fill & Sign when saving	Kaydederken Doldur ve İmzala'yı düzleştir
 	Text, marks and signatures become part of the page. Other comments stay editable.	Metin, işaretler ve imzalar sayfanın bir parçası olur. Diğer yorumlar düzenlenebilir kalır.
 	OK	Tamam
-	Join our Discord	Discord'umuza katılın
+	Command help	Discord'umuza katılın
 	Close	Kapat
 	Next / previous match	Sonraki / önceki eşleşme
 	Copy selected text	Seçilen metni kopyala
@@ -269,10 +269,10 @@
 	Split document…	Belgeyi böl…
 	Number pages…	Sayfaları numaralandır…
 	Keyboard shortcuts	Klavye kısayolları
-	Join the ArtCraft Discord	ArtCraft Discord'una katıl
+	Command help	ArtCraft Discord'una katıl
 	Command PDF web page	Command PDF web sayfası
 	Command PDF on GitHub	GitHub'da Command PDF
-	ArtCraft website	ArtCraft web sitesi
+	Command	ArtCraft web sitesi
 	Check for updates…	Güncellemeleri denetle…
 	About Command PDF	Command PDF hakkında
 	Export a PDF	PDF'i dışa aktar

@@ -29,10 +29,10 @@ fn discord_button_in_the_top_bar_opens_discord() {
 #[test]
 fn home_screen_links() {
     for (label, url) in [
-        ("Join our Discord", links::DISCORD),
+        ("Command help", links::DISCORD),
         ("Command PDF web page", "https://getartcraft.com/apps/pdfcraft"),
         ("Command PDF on GitHub", "https://github.com/storytold/pdfcraft"),
-        ("ArtCraft website", "https://getartcraft.com"),
+        ("Command", "https://getartcraft.com"),
     ] {
         let mut h = harness(|_| {});
         h.get_by_label("Command PDF pilot");
@@ -51,7 +51,7 @@ fn about_dialog_shows_the_brand_and_links() {
         app.dialog = Some(Dialog::About);
     });
     assert!(h.query_all_by_label("ArtCraft").count() >= 2, "the mark and the wordmark (alt text)");
-    h.get_by_label("Join our Discord").click();
+    h.get_by_label("Command help").click();
     h.run_steps(2);
     assert_eq!(h.state().last_opened_url.as_deref(), Some(links::DISCORD));
 }

@@ -89,7 +89,7 @@
 	Flatten Fill & Sign when saving	Расплющить «Заполнить и подписать» при сохранении
 	Text, marks and signatures become part of the page. Other comments stay editable.	Текст, пометки и подписи становятся частью страницы. Остальные комментарии можно по-прежнему править.
 	OK	OK
-	Join our Discord	Присоединяйтесь к нашему Discord
+	Command help	Присоединяйтесь к нашему Discord
 	Close	Закрыть
 	Next / previous match	Следующее / предыдущее совпадение
 	Copy selected text	Копировать выделенный текст
@@ -304,10 +304,10 @@
 	Split document…	Разделить документ…
 	Number pages…	Пронумеровать страницы…
 	Keyboard shortcuts	Горячие клавиши
-	Join the ArtCraft Discord	Присоединяйтесь к Discord ArtCraft
+	Command help	Присоединяйтесь к Discord ArtCraft
 	Command PDF web page	Веб-страница Command PDF
 	Command PDF on GitHub	Command PDF на GitHub
-	ArtCraft website	Веб-сайт ArtCraft
+	Command	Веб-сайт ArtCraft
 	Check for updates…	Проверить обновления…
 	About Command PDF	О программе Command PDF
 	Export a PDF	Экспортировать PDF

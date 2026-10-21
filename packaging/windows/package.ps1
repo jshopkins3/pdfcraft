@@ -48,6 +48,13 @@ $MsiVersion = ($Version -split '-')[0]
 $Target = switch ($Arch) { 'x64' { 'x86_64-pc-windows-msvc' } 'x86' { 'i686-pc-windows-msvc' } 'arm64' { 'aarch64-pc-windows-msvc' } }
 $Dist = if ($env:DIST) { $env:DIST } else { Join-Path $Root 'dist\release' }
 $TargetDir = if ($env:CARGO_TARGET_DIR) { $env:CARGO_TARGET_DIR } else { Join-Path $Root 'target' }
+function Assert-BuildOutput([string] $Path) {
+  $base = [IO.Path]::GetFullPath($TargetDir).TrimEnd('\', '/') + [IO.Path]::DirectorySeparatorChar
+  $resolved = [IO.Path]::GetFullPath($Path)
+  if (-not $resolved.StartsWith($base, [StringComparison]::OrdinalIgnoreCase)) {
+    throw "Refusing cleanup outside build target: $resolved"
+  }
+}
 New-Item -ItemType Directory -Force -Path $Dist | Out-Null
 
 if (-not $env:PDFCRAFT_BUILD_SHA) { $env:PDFCRAFT_BUILD_SHA = (git -C $Root rev-parse HEAD 2>$null) }
@@ -84,7 +91,8 @@ foreach ($check in @(@('pdfcraft.exe', 2), @('pdfcraft-cli.exe', 3))) {
   Write-Output "ok $($check[0]): $Arch, PE subsystem $($h.Subsystem)"
 }
 $Stage = Join-Path $TargetDir "windows-package\$Arch"
-Remove-Item -Recurse -Force $Stage -ErrorAction SilentlyContinue
+Assert-BuildOutput $Stage
+Remove-Item -LiteralPath $Stage -Recurse -Force -ErrorAction SilentlyContinue
 New-Item -ItemType Directory -Force -Path $Stage | Out-Null
 Copy-Item (Join-Path $Bin 'pdfcraft.exe') (Join-Path $Stage 'command-pdf.exe')
 Copy-Item (Join-Path $Bin 'pdfcraft-cli.exe') (Join-Path $Stage 'command-pdf-cli.exe')
@@ -135,7 +143,8 @@ Remove-Item -Force -ErrorAction SilentlyContinue ([IO.Path]::ChangeExtension($Ms
 
 # ---- portable zip ------------------------------------------------------------------------------
 $Portable = Join-Path $TargetDir "windows-package\pdfcraft-$Version-windows-$Arch-portable"
-Remove-Item -Recurse -Force $Portable -ErrorAction SilentlyContinue
+Assert-BuildOutput $Portable
+Remove-Item -LiteralPath $Portable -Recurse -Force -ErrorAction SilentlyContinue
 New-Item -ItemType Directory -Force -Path $Portable | Out-Null
 Copy-Item (Join-Path $Stage '*.exe') $Portable
 foreach ($f in 'NOTICE', 'LICENSE-document.txt') {

@@ -664,7 +664,7 @@ theme	Appearance	Giao diện
 	JavaScript Console	Bảng điều khiển JavaScript
 	JavaScript is turned off (Preferences ▸ JavaScript).	JavaScript đã bị tắt (Tùy chọn > JavaScript).
 	JavaScript, e.g. getField("total").value	JavaScript, ví dụ getField("total").value
-	Join our Discord	Tham gia Discord của chúng tôi
+	Command help	Tham gia Discord của chúng tôi
 	Command PDF pilot	Tham gia cộng đồng ArtCraft
 	Justify	Căn đều
 	Keep source fonts	Giữ phông chữ nguồn
@@ -1335,7 +1335,7 @@ theme	Appearance	Giao diện
 	Archive documents	Lưu trữ tài liệu
 	Area	Diện tích
 	Arrow	Mũi tên
-	ArtCraft website	Trang web ArtCraft
+	Command	Trang web ArtCraft
 	Ask about this document	Hỏi về tài liệu này
 	Attach a file	Đính kèm một tệp
 	Attach file	Đính kèm tệp
@@ -1470,7 +1470,7 @@ theme	Appearance	Giao diện
 	Insert text	Chèn văn bản
 	JavaScript	JavaScript
 	JavaScript console…	Bảng điều khiển JavaScript…
-	Join the ArtCraft Discord	Tham gia Discord của ArtCraft
+	Command help	Tham gia Discord của ArtCraft
 	Light gray	Xám nhạt
 	Line	Đường thẳng
 	Link	Liên kết
