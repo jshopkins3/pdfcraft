@@ -19,7 +19,11 @@ fn harness(setup: impl FnOnce(&mut PdfCraftApp) + 'static) -> Harness<'static, P
 
 #[test]
 fn command_sign_button_opens_signing_without_sending_a_document() {
-    let mut h = harness(|app| {
+    // Open a real synthetic page so this exercises the document's signing panel,
+    // rather than matching the separate home-screen shortcut too.
+    let pdf = b"%PDF-1.7\n1 0 obj << /Type /Catalog /Pages 2 0 R >> endobj\n2 0 obj << /Type /Pages /Kids [3 0 R] /Count 1 >> endobj\n3 0 obj << /Type /Page /Parent 2 0 R /MediaBox [0 0 200 200] >> endobj\ntrailer << /Root 1 0 R >>\n%%EOF";
+    let mut h = harness(move |app| {
+        app.open_bytes("sign-test.pdf", None, pdf.to_vec()).unwrap();
         app.set_option("mode", "sign").unwrap();
         app.set_option("tool", "fill_sign").unwrap();
     });
