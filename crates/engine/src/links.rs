@@ -25,11 +25,11 @@ pub struct Link {
 
 /// In the order they are shown. Discord comes first: it is where people get help fastest.
 pub const LINKS: &[Link] = &[
-    Link { command: "help.command_sign", label: "Open Command Sign", url: COMMAND_SIGN, icon: "external-link" },
     Link { command: "help.discord", label: "Command help", url: DISCORD, icon: "messages-square" },
     Link { command: "help.app_page", label: "Command PDF web page", url: APP_PAGE, icon: "globe" },
     Link { command: "help.github", label: "Command PDF on GitHub", url: GITHUB, icon: "code-xml" },
     Link { command: "help.website", label: "Command", url: WEBSITE, icon: "external-link" },
+    Link { command: "help.command_sign", label: "Open Command Sign", url: COMMAND_SIGN, icon: "external-link" },
 ];
 
 pub fn for_command(id: &str) -> Option<&'static Link> {
