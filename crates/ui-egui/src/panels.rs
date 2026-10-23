@@ -166,6 +166,13 @@ fn tool_detail(app: &mut PdfCraftApp, ui: &mut egui::Ui, t: &Tokens, g: &'static
         crate::measure_ui::panel(app, ui, t);
         return;
     }
+    if g.id == "fill_sign" {
+        if ui.button(tl!("Open Command Sign")).clicked() {
+            app.execute("help.command_sign");
+        }
+        ui.label(tl!("Save your PDF, then upload it in Command Sign to request signatures."));
+        ui.add_space(8.0);
+    }
     // Add a stamp: the palette.
     if g.id == "stamp" {
         stamp_palette(app, ui, t);

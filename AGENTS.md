@@ -137,3 +137,9 @@ Follow `CLAUDE.md`. It covers quality gates, layering, commit rules and how to r
   GitHub profiles). Never hand-edit `contributors.json`.
 - Maintainers refresh the stats with `python3 ../../craftrules/scripts/contributors.py .` (it also
   re-verifies who wrote each `people.toml` entry; `--check` only verifies).
+
+## Command PDF fork scope (John, 2026-10-21)
+Build the branded Windows x64 pilot from pinned PdfCraft v0.10.1. Preserve engine behavior and safeguards. Command marks are a narrow trademark exception for this product only, under LicenseRef-MCM-Trademark; do not relicense them. Keep upstream code and contributor notices. No Intra-Lounge publication until separately accepted. Windows CI supplies compilation and tests because this desk has no Rust/MSVC toolchain; checkpoint commits may be pushed with checks pending, never described as green.
+
+## Command PDF fork scope (John, 2026-10-21)
+Build the branded Windows x64 pilot from pinned PdfCraft v0.10.1. Preserve engine behavior and safeguards. Command marks are a narrow trademark exception for this product only, under LicenseRef-MCM-Trademark; do not relicense them. Keep upstream code and contributor notices. No Intra-Lounge publication until separately accepted. Windows CI supplies compilation and tests because this desk has no Rust/MSVC toolchain; checkpoint commits may be pushed with checks pending, never described as green.
