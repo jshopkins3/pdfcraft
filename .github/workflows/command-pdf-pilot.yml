@@ -132,7 +132,9 @@ jobs:
         run: |
           curl -fsSLO https://github.com/trunk-rs/trunk/releases/download/v0.22.1/trunk-x86_64-unknown-linux-gnu.tar.gz
           curl -fsSLO https://github.com/trunk-rs/trunk/releases/download/v0.22.1/trunk-x86_64-unknown-linux-gnu.tar.gz.sha256
-          sha256sum -c trunk-x86_64-unknown-linux-gnu.tar.gz.sha256
+          expected=$(tr -d '[:space:]' < trunk-x86_64-unknown-linux-gnu.tar.gz.sha256)
+          [[ "$expected" =~ ^[a-fA-F0-9]{64}$ ]]
+          echo "$expected  trunk-x86_64-unknown-linux-gnu.tar.gz" | sha256sum -c -
           mkdir -p "$RUNNER_TEMP/trunk"
           tar -xzf trunk-x86_64-unknown-linux-gnu.tar.gz -C "$RUNNER_TEMP/trunk"
           echo "$RUNNER_TEMP/trunk" >> "$GITHUB_PATH"
