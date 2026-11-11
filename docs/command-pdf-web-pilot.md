@@ -39,6 +39,13 @@ API proposal classified it as static; the account had zero static apps and a fre
 allowance of three. The proposal omitted app_cost, so no numeric cost was returned.
 DigitalOcean's published static-site allowance and bandwidth terms still apply.
 
+The hosting source directory is `packaging/web/static-source`, containing only the
+HTML build entry. DigitalOcean detects buildpacks before the custom command; using
+`apps/pdfcraft-web` incorrectly selects Rust because that directory has Cargo.toml.
+The custom command runs the adjacent `prepare-static.sh` and publishes only `site/`,
+so the build entry is never served as the editor. The release artifact retains its
+actual compiled source SHA even when a later main commit changes hosting settings.
+
 The direct Teams admin Manage apps page and Entra cloud-admin access were observed in
 Chrome. This bypasses the general admin-center landing page for this workflow; it does
 not remove the tenant's GoDaddy redirect or change any employee sign-in configuration.
