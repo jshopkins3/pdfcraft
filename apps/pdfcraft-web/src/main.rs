@@ -13,10 +13,10 @@ fn main() {
 
     let options = eframe::WebOptions { renderer: eframe::Renderer::Glow, ..Default::default() };
     wasm_bindgen_futures::spawn_local(async move {
-        if query_param("host").as_deref() == Some("m365") {
-            if let Err(error) = m365::initialize().await {
-                eframe::web_sys::console::warn_1(&format!("Command PDF: {error}").into());
-            }
+        if query_param("host").as_deref() == Some("m365")
+            && let Err(error) = m365::initialize().await
+        {
+            eframe::web_sys::console::warn_1(&format!("Command PDF: {error}").into());
         }
         let Some(canvas) = web_sys::window()
             .and_then(|w| w.document())
