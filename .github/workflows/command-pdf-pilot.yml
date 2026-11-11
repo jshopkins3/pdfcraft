@@ -150,11 +150,14 @@ jobs:
       - name: Check browser and engine with Clippy
         run: cargo clippy --locked --target wasm32-unknown-unknown -p pdfcraft-web -p pdfcraft-engine -j 4 -- -D warnings
       - name: Check layering and asset provenance
+        id: assets
+        continue-on-error: true
         run: |
           cargo xtask layers
           cargo xtask assets --write
           cargo xtask assets
           git diff --binary -- ATTRIBUTION.md > attribution.patch
+          test ! -s attribution.patch
       - name: Record candidate source
         if: always()
         run: |
@@ -172,4 +175,7 @@ jobs:
           retention-days: 14
       - name: Require committed formatting
         if: steps.format.outcome == 'failure'
+        run: exit 1
+      - name: Require committed asset attribution
+        if: steps.assets.outcome == 'failure'
         run: exit 1

@@ -19,11 +19,8 @@ pub async fn initialize() -> Result<(), String> {
     let app = namespace("app")?;
     let promise = call(&app, "initialize")?.dyn_into::<js_sys::Promise>().map_err(|_| "Invalid Microsoft 365 initialization")?;
     wasm_bindgen_futures::JsFuture::from(promise).await.map_err(|_| "Could not connect to the Microsoft 365 host")?;
-    if let Ok(core) = namespace("teamsCore")
-        && call(&core, "isSupported").ok().and_then(|v| v.as_bool()) == Some(true)
-    {
-        let _ = call(&core, "enablePrintCapability");
-    }
+    // Keep Command PDF's document print shortcut. Teams' default print capability
+    // intercepts Ctrl/Cmd+P and prints the app window, not its prepared PDF sheets.
     Ok(())
 }
 

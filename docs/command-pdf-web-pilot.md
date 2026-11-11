@@ -25,7 +25,20 @@ The pilot's web entry needs no Windows signing subscription or public Store list
 Hosting remains on DigitalOcean. OCR, certificate signing, complex forms, large files
 and advanced tools remain outside this first browser acceptance.
 
-Verification pending: current-main merge, exact-head hosted build/checks, branded browser
+Verification pending: integration into main, exact-head hosted build/checks, branded browser
 runtime, actual Outlook/Teams open/save/reopen/print, catalog installation and Edge shortcut.
 Rollback: remove the pilot catalog entry and restore the last accepted static package;
 leave employees' downloaded files and existing desktop installation untouched.
+
+Deployment uses `packaging/web/digitalocean-pilot.json` with three explicit BUILD_TIME
+values: COMMAND_PDF_PACKAGE_URL, COMMAND_PDF_PACKAGE_SHA256 and COMMAND_PDF_SOURCE_SHA.
+The static builder downloads only the chosen release, verifies its checksum, validates
+ZIP paths and bounds, and publishes its source ID at build.json. It never compiles Rust
+on the production server. The app spec has no service, worker or database. November 11
+API proposal classified it as static; the account had zero static apps and a free
+allowance of three. The proposal omitted app_cost, so no numeric cost was returned.
+DigitalOcean's published static-site allowance and bandwidth terms still apply.
+
+The direct Teams admin Manage apps page and Entra cloud-admin access were observed in
+Chrome. This bypasses the general admin-center landing page for this workflow; it does
+not remove the tenant's GoDaddy redirect or change any employee sign-in configuration.
