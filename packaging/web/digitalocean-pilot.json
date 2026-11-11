@@ -8,9 +8,9 @@
       "branch": "main"
     },
     "environment_slug": "html",
-    "source_dir": "apps/pdfcraft-web",
+    "source_dir": "packaging/web/static-source",
     "output_dir": "site",
-    "build_command": "bash ../../packaging/web/prepare-static.sh",
+    "build_command": "bash ../prepare-static.sh",
     "index_document": "index.html"
   }]
 }
