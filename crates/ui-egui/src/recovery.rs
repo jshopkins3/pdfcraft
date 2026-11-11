@@ -154,6 +154,8 @@ impl RecoveryStore {
             Err(TryLockError::WouldBlock) => true,
             Ok(()) => {
                 let _ = file.unlock();
+                // The browser's File is a stub; native handles must close before removal.
+                #[cfg(not(target_arch = "wasm32"))]
                 drop(file);
                 let _ = std::fs::remove_file(&path);
                 false

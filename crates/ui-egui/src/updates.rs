@@ -52,6 +52,7 @@ pub(crate) enum Check {
     Idle,
     #[cfg(not(target_arch = "wasm32"))]
     Running(std::sync::mpsc::Receiver<Result<Release, String>>),
+    #[cfg(not(target_arch = "wasm32"))]
     Done(Result<Release, String>),
 }
 
@@ -113,6 +114,7 @@ pub(crate) fn dialog(app: &mut PdfCraftApp, ctx: &egui::Context) {
         return;
     }
     let t = theme::Tokens::get(ctx);
+    #[cfg(not(target_arch = "wasm32"))]
     let current = env!("CARGO_PKG_VERSION");
     let mut close = false;
     let mut download: Option<String> = None;
@@ -134,6 +136,7 @@ pub(crate) fn dialog(app: &mut PdfCraftApp, ctx: &egui::Context) {
                     ui.label(tl!("Checking for a newer version…"));
                 });
             }
+            #[cfg(not(target_arch = "wasm32"))]
             Check::Done(Ok(r)) if is_newer(&r.version, current) => {
                 let version = r.version.trim_start_matches(['v', 'V']);
                 ui.label(egui::RichText::new(crate::i18n::fmt(tl!("Command PDF {v} is available."), &[("v", version)])).strong());
@@ -146,9 +149,11 @@ pub(crate) fn dialog(app: &mut PdfCraftApp, ctx: &egui::Context) {
                 );
                 download = Some(r.url.clone());
             }
+            #[cfg(not(target_arch = "wasm32"))]
             Check::Done(Ok(_)) => {
                 ui.label(crate::i18n::fmt(tl!("Command PDF {c} is up to date."), &[("c", current)]));
             }
+            #[cfg(not(target_arch = "wasm32"))]
             Check::Done(Err(e)) => {
                 ui.label(crate::i18n::fmt(tl!("Couldn't check for updates: {e}"), &[("e", &e.to_string())]));
                 ui.label(

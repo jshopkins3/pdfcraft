@@ -177,12 +177,12 @@ jobs:
         continue-on-error: true
         run: |
           cargo fmt --all -- --check || { cargo fmt --all; git diff --binary > format.patch; exit 1; }
+      - name: Check browser and engine with Clippy
+        run: cargo clippy --locked --target wasm32-unknown-unknown -p pdfcraft-web -p pdfcraft-engine -j 4 -- -D warnings
       - name: Test export archive and existing engine behavior
         run: cargo test --locked -p pdfcraft-engine -j 4
       - name: Build branded browser candidate
         run: bash packaging/web/package.sh
-      - name: Check browser and engine with Clippy
-        run: cargo clippy --locked --target wasm32-unknown-unknown -p pdfcraft-web -p pdfcraft-engine -j 4 -- -D warnings
       - name: Record candidate source
         if: always()
         run: |

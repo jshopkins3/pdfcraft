@@ -1004,6 +1004,7 @@ fn is_form_edit(edit: &Edit) -> bool {
 /// email and are deleted with the cache. Apple Mail opens one from `Mail Downloads/<UUID>/` in
 /// its sandbox container, where other apps can't write, so saving there fails (#2751). Matched on
 /// either separator and in any case, so it can be tested on every platform.
+#[cfg(any(test, not(target_arch = "wasm32")))]
 pub(crate) fn is_mail_temp_copy(path: &str) -> bool {
     let p = path.replace('\\', "/").to_ascii_lowercase();
     p.contains("/inetcache/content.outlook/")
