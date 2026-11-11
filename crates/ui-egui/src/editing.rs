@@ -1048,15 +1048,25 @@ pub(crate) fn download(name: &str, bytes: &[u8]) -> Result<(), String> {
     let array = js_sys::Uint8Array::from(bytes);
     let parts = js_sys::Array::of1(&array);
     let opts = web_sys::BlobPropertyBag::new();
-    opts.set_type("application/pdf");
+    opts.set_type(if name.ends_with(".zip") { "application/zip" } else { "application/pdf" });
     let blob = web_sys::Blob::new_with_u8_array_sequence_and_options(&parts, &opts).map_err(err)?;
     let url = web_sys::Url::create_object_url_with_blob(&blob).map_err(err)?;
     let document = web_sys::window().and_then(|w| w.document()).ok_or("no document")?;
     let a: web_sys::HtmlAnchorElement = document.create_element("a").map_err(err)?.dyn_into().map_err(|_| "anchor")?;
     a.set_href(&url);
     a.set_download(name);
+    let body = document.body().ok_or("no document body")?;
+    body.append_child(&a).map_err(err)?;
     a.click();
-    let _ = web_sys::Url::revoke_object_url(&url);
+    a.remove();
+    // WebViews may consume the download after the click returns. Immediate revocation can
+    // leave the host with a dead URL. The tab owns it until this bounded grace period ends.
+    let cleanup = wasm_bindgen::closure::Closure::once_into_js(move || {
+        let _ = web_sys::Url::revoke_object_url(&url);
+    });
+    if let Some(window) = web_sys::window() {
+        let _ = window.set_timeout_with_callback_and_timeout_and_arguments_0(cleanup.unchecked_ref(), 60_000);
+    }
     Ok(())
 }
 

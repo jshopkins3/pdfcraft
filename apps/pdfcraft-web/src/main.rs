@@ -4,12 +4,20 @@
 #![deny(clippy::unwrap_used, clippy::expect_used, clippy::panic, clippy::unimplemented, clippy::todo, clippy::unreachable)]
 
 #[cfg(target_arch = "wasm32")]
+mod m365;
+
+#[cfg(target_arch = "wasm32")]
 fn main() {
     use eframe::wasm_bindgen::JsCast;
     use pdfcraft_ui_egui::PdfCraftApp;
 
     let options = eframe::WebOptions { renderer: eframe::Renderer::Glow, ..Default::default() };
     wasm_bindgen_futures::spawn_local(async move {
+        if query_param("host").as_deref() == Some("m365") {
+            if let Err(error) = m365::initialize().await {
+                eframe::web_sys::console::warn_1(&format!("Command PDF: {error}").into());
+            }
+        }
         let Some(canvas) = web_sys::window()
             .and_then(|w| w.document())
             .and_then(|d| d.get_element_by_id("pdfcraft"))
@@ -86,6 +94,8 @@ fn main() {
             {
                 bridge.post_failed(&e.as_string().unwrap_or_else(|| format!("{e:?}")));
             }
+        } else if query_param("host").as_deref() == Some("m365") {
+            m365::ready();
         }
     });
 }

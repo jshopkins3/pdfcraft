@@ -720,6 +720,19 @@ impl PdfCraftApp {
         #[cfg(target_arch = "wasm32")]
         {
             let _ = title;
+            if named.len() > 1 {
+                match pdfcraft_engine::export::browser_download_bundle(&named)
+                    .and_then(|bytes| crate::editing::download("Command PDF files.zip", &bytes))
+                {
+                    Ok(()) => self.notify_tr("Your files are in one ZIP download"),
+                    Err(e) => {
+                        self.notify_error(&e);
+                        return;
+                    }
+                }
+                after(self);
+                return;
+            }
             for (name, bytes) in &named {
                 if let Err(e) = crate::editing::download(name, bytes) {
                     self.notify_fmt("Couldn't download {name}: {e}", &[("name", name), ("e", &e.to_string())]);

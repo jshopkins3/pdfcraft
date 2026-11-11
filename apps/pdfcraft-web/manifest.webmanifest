@@ -1,0 +1,12 @@
+{
+  "id": "./",
+  "name": "Command PDF",
+  "short_name": "Command PDF",
+  "description": "Edit, combine, annotate and fill PDFs on your device.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f1f1f3",
+  "theme_color": "#102a43",
+  "icons": [{"src": "pdfcraft-1024.png", "sizes": "1024x1024", "type": "image/png", "purpose": "any"}]
+}

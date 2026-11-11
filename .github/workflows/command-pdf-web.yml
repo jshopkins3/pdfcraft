@@ -1,0 +1,77 @@
+name: Command PDF browser pilot
+on:
+  push:
+    branches: [feat/command-pdf-web-pilot]
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: command-pdf-web-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  browser:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    env:
+      CARGO_BUILD_JOBS: 4
+      CARGO_PROFILE_RELEASE_LTO: 'false'
+      CARGO_PROFILE_RELEASE_CODEGEN_UNITS: 16
+      CARGO_PROFILE_DEV_DEBUG: '0'
+      CARGO_PROFILE_TEST_DEBUG: '0'
+      PDFCRAFT_BUILD_LABEL: MCM.web.pilot.1
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - name: Record runner capacity
+        run: |
+          df -h .
+          free -h
+          ps -eo pid,comm,pcpu,pmem --sort=-pcpu | head -12
+      - uses: dtolnay/rust-toolchain@686976e191b89faba57d3206551f0f330d8cb249
+        with:
+          toolchain: '1.95.0'
+          targets: wasm32-unknown-unknown
+          components: rustfmt, clippy
+      - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6
+        with:
+          key: command-pdf-web
+          cache-on-failure: true
+      - name: Install pinned Trunk
+        run: |
+          curl -fsSLO https://github.com/trunk-rs/trunk/releases/download/v0.22.1/trunk-x86_64-unknown-linux-gnu.tar.gz
+          curl -fsSLO https://github.com/trunk-rs/trunk/releases/download/v0.22.1/trunk-x86_64-unknown-linux-gnu.tar.gz.sha256
+          sha256sum -c trunk-x86_64-unknown-linux-gnu.tar.gz.sha256
+          mkdir -p "$RUNNER_TEMP/trunk"
+          tar -xzf trunk-x86_64-unknown-linux-gnu.tar.gz -C "$RUNNER_TEMP/trunk"
+          echo "$RUNNER_TEMP/trunk" >> "$GITHUB_PATH"
+      - name: Check formatting
+        id: format
+        continue-on-error: true
+        run: |
+          cargo fmt --all -- --check || { cargo fmt --all; git diff --binary > format.patch; exit 1; }
+      - name: Test export archive and existing engine behavior
+        run: cargo test --locked -p pdfcraft-engine -j 4
+      - name: Build branded browser candidate
+        run: bash packaging/web/package.sh
+      - name: Check browser and engine with Clippy
+        run: cargo clippy --locked --target wasm32-unknown-unknown -p pdfcraft-web -p pdfcraft-engine -j 4 -- -D warnings
+      - name: Check layering and asset provenance
+        run: |
+          cargo xtask layers
+          cargo xtask assets
+      - name: Record candidate source
+        if: always()
+        run: |
+          mkdir -p dist/release
+          git rev-parse HEAD > dist/release/source-commit.txt
+          rustc --version > dist/release/toolchain.txt
+          if test -f format.patch; then cp format.patch dist/release/; fi
+          find dist/release -maxdepth 1 -name '*.zip' -exec sha256sum {} \; > dist/release/SHA256SUMS.txt
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        if: always()
+        with:
+          name: command-pdf-web-candidate
+          path: dist/release/
+          retention-days: 14
+      - name: Require committed formatting
+        if: steps.format.outcome == 'failure'
+        run: exit 1

@@ -8,6 +8,55 @@ use pdfcraft_render::{PageRenderer, RenderRequest, RequestKind};
 
 use crate::Document;
 
+/// One bounded archive for browser multi-file exports. A browser may silently block the
+/// second automatic download. Keep every named result together without changing its bytes.
+pub fn browser_download_bundle(files: &[(String, Vec<u8>)]) -> Result<Vec<u8>, String> {
+    if files.is_empty() || files.len() > 1000 {
+        return Err("Choose between 1 and 1000 files for one download".into());
+    }
+    let mut total = 0usize;
+    let mut names = std::collections::HashSet::new();
+    for (name, data) in files {
+        if name.is_empty() || name.len() > 255 || name.contains(['/', '\\', '\0']) || name == "." || name == ".." || !names.insert(name) {
+            return Err("The download has an invalid or repeated file name".into());
+        }
+        total = total.checked_add(data.len()).ok_or("The download is too large")?;
+        if total > 256 * 1024 * 1024 {
+            return Err("Split this export into downloads smaller than 256 MB".into());
+        }
+    }
+    // Bounds above keep counts, offsets and name lengths inside this non-ZIP64 writer.
+    let mut archive = pdfcraft_export::Zip::default();
+    for (name, data) in files {
+        archive.add(name, data, false);
+    }
+    Ok(archive.finish())
+}
+
+#[cfg(test)]
+mod browser_bundle_tests {
+    use super::browser_download_bundle;
+
+    #[test]
+    fn bundles_every_file_without_altering_bytes() {
+        let files = vec![("page 1.pdf".into(), b"first PDF bytes".to_vec()), ("page 2.pdf".into(), b"second PDF bytes".to_vec())];
+        let bytes = browser_download_bundle(&files).unwrap();
+        assert!(bytes.starts_with(b"PK\x03\x04"));
+        for (name, data) in files {
+            assert_eq!(bytes.windows(name.len()).filter(|w| *w == name.as_bytes()).count(), 2);
+            assert_eq!(bytes.windows(data.len()).filter(|w| *w == data).count(), 1);
+        }
+        assert_eq!(u16::from_le_bytes(bytes[bytes.len() - 12..bytes.len() - 10].try_into().unwrap()), 2);
+    }
+
+    #[test]
+    fn rejects_unsafe_duplicate_or_unbounded_entries() {
+        for files in [vec![], vec![("../escape.pdf".into(), vec![])], vec![("same.pdf".into(), vec![]); 2], vec![("x.pdf".into(), vec![]); 1001]] {
+            assert!(browser_download_bundle(&files).is_err());
+        }
+    }
+}
+
 /// Renders and extracts pages of one document state.
 pub struct Exporter {
     renderer: PageRenderer,
