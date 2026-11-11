@@ -3304,6 +3304,28 @@ usage = "Command PDF Windows pilot branding"
 sha256 = "667c1b472dd31ae6beedc56f76e8cc426ec0acdc4b80f38e02ca97877a08d2d3"
 
 [[asset]]
+path = "packaging/m365/color.png"
+title = "Command PDF Microsoft 365 color icon"
+author = "My Community Mortgage"
+source = "Derived from approved assets/app-icon/pdfcraft-1024.png; John authorized browser catalog pilot 2026-11-11"
+licence = "LicenseRef-MCM-Trademark"
+licence_file = "docs/brand/LICENSE-command.txt"
+kind = "icon"
+usage = "192px company-catalog icon; approved Command mark centered within the Microsoft 365 safe area"
+sha256 = "783f18662cd2120f77aa5aba48a0c9d147878de9da2b3df451e1ea3008236298"
+
+[[asset]]
+path = "packaging/m365/outline.png"
+title = "Command PDF Microsoft 365 outline icon"
+author = "My Community Mortgage"
+source = "White mark extracted from approved assets/app-icon/pdfcraft-1024.png; John authorized browser catalog pilot 2026-11-11"
+licence = "LicenseRef-MCM-Trademark"
+licence_file = "docs/brand/LICENSE-command.txt"
+kind = "icon"
+usage = "32px white Command mark on a transparent background for the Microsoft 365 app bar"
+sha256 = "dc9a8fd6148aaf5239325c752eb04f13875a6d1022130c9cb17f80dd348c50f3"
+
+[[asset]]
 path = "docs/brand/command-logo.svg"
 title = "Command approved mark"
 author = "My Community Mortgage"

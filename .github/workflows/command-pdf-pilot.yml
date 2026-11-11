@@ -152,7 +152,9 @@ jobs:
       - name: Check layering and asset provenance
         run: |
           cargo xtask layers
+          cargo xtask assets --write
           cargo xtask assets
+          git diff --binary -- ATTRIBUTION.md > attribution.patch
       - name: Record candidate source
         if: always()
         run: |
@@ -160,6 +162,7 @@ jobs:
           git rev-parse HEAD > dist/release/source-commit.txt
           rustc --version > dist/release/toolchain.txt
           if test -f format.patch; then cp format.patch dist/release/; fi
+          if test -s attribution.patch; then cp attribution.patch dist/release/; fi
           find dist/release -maxdepth 1 -name '*.zip' -exec sha256sum {} \; > dist/release/SHA256SUMS.txt
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         if: always()

@@ -10,13 +10,14 @@ use crate::Document;
 
 /// One bounded archive for browser multi-file exports. A browser may silently block the
 /// second automatic download. Keep every named result together without changing its bytes.
-pub fn browser_download_bundle(files: &[(String, Vec<u8>)]) -> Result<Vec<u8>, String> {
+pub fn browser_download_bundle<B: std::borrow::Borrow<Vec<u8>>>(files: &[(String, B)]) -> Result<Vec<u8>, String> {
     if files.is_empty() || files.len() > 1000 {
         return Err("Choose between 1 and 1000 files for one download".into());
     }
     let mut total = 0usize;
     let mut names = std::collections::HashSet::new();
     for (name, data) in files {
+        let data = data.borrow();
         if name.is_empty() || name.len() > 255 || name.contains(['/', '\\', '\0']) || name == "." || name == ".." || !names.insert(name) {
             return Err("The download has an invalid or repeated file name".into());
         }
@@ -28,7 +29,7 @@ pub fn browser_download_bundle(files: &[(String, Vec<u8>)]) -> Result<Vec<u8>, S
     // Bounds above keep counts, offsets and name lengths inside this non-ZIP64 writer.
     let mut archive = pdfcraft_export::Zip::default();
     for (name, data) in files {
-        archive.add(name, data, false);
+        archive.add(name, data.borrow(), false);
     }
     Ok(archive.finish())
 }
@@ -47,6 +48,14 @@ mod browser_bundle_tests {
             assert_eq!(bytes.windows(data.len()).filter(|w| *w == data).count(), 1);
         }
         assert_eq!(u16::from_le_bytes(bytes[bytes.len() - 12..bytes.len() - 10].try_into().unwrap()), 2);
+    }
+
+    #[test]
+    fn accepts_shared_browser_buffers_without_copying_them() {
+        let bytes = std::sync::Arc::new(b"shared PDF bytes".to_vec());
+        let bundle = browser_download_bundle(&[("page.pdf".into(), bytes.clone())]).unwrap();
+        assert!(bundle.windows(bytes.len()).any(|window| window == bytes.as_slice()));
+        assert_eq!(std::sync::Arc::strong_count(&bytes), 1);
     }
 
     #[test]

@@ -251,6 +251,8 @@ pub fn check(root: &Path, m: &Manifest, repo_files: &[String], lock: &BTreeSet<(
                         | "assets/app-icon/pdfcraft.ico"
                         | "assets/app-icon/pdfcraft-document.ico"
                         | "assets/app-icon/pdfcraft-1024.png"
+                        | "packaging/m365/color.png"
+                        | "packaging/m365/outline.png"
                 ));
         if !brand {
             licence_ok(&a.path, &a.licence, &mut problems);
