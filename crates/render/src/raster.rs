@@ -82,7 +82,7 @@ impl RenderConfig {
 /// A Japanese face from craft-fonts for a CID font of the Adobe-Japan1 collection that the PDF
 /// doesn't embed (`HeiseiMin-W3`, `KozGoPro-Medium`, …). hayro's own substitutes for fonts that
 /// aren't embedded are the Latin standard 14, so such text drew nothing. `None` for every other
-/// font, and when PdfCraft was built without craft-fonts. Only Japanese: the pinned craft-fonts
+/// font, and when Command PDF was built without craft-fonts. Only Japanese: the pinned craft-fonts
 /// has no other CJK faces, and its later Chinese face is Noto CJK, which AGENTS.md §1.1 rules out.
 fn japanese_fallback(query: &FontQuery) -> Option<(FontData, u32)> {
     let FontQuery::Fallback(f) = query else { return None };
@@ -182,11 +182,13 @@ fn request_reading(config: &RenderConfig, req: &RenderRequest) -> ReadingColors 
 /// let one pathological page tie up a worker for the full watchdog limit per zoom and per tile
 /// (exhausting worker replacements) and re-parse the document for every new request.
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
+#[cfg(not(target_arch = "wasm32"))]
 struct RequestFailureKey {
     page: usize,
     kind: RequestKind,
 }
 
+#[cfg(not(target_arch = "wasm32"))]
 impl From<RenderRequest> for RequestFailureKey {
     fn from(req: RenderRequest) -> Self {
         Self { page: req.page, kind: req.kind }
@@ -244,6 +246,7 @@ struct AtomicRenderStats {
 }
 
 impl AtomicRenderStats {
+    #[cfg(not(target_arch = "wasm32"))]
     fn record_request(&self, req: RenderRequest) {
         self.render_requests.fetch_add(1, Ordering::Relaxed);
         if req.tile.is_some() {
@@ -541,6 +544,7 @@ struct Shared {
     busy: Mutex<Vec<Option<Busy>>>,
     /// Exact requests the watchdog gave up on: answered with an error at once, so a pathological
     /// request cannot trap every worker in turn while other scales, tiles, or generations remain usable.
+    #[cfg(not(target_arch = "wasm32"))]
     stuck: Mutex<std::collections::HashSet<RequestFailureKey>>,
     stats: AtomicRenderStats,
     /// Per worker id: set to stop that worker's render at its next content operator once nobody
@@ -715,8 +719,11 @@ pub struct RenderPool {
     shared: Arc<Shared>,
     wake: Mutex<Vec<SyncSender<()>>>,
     results: ResultReceiver,
+    #[cfg(not(target_arch = "wasm32"))]
     results_tx: Arc<WorkQueue>,
+    #[cfg(not(target_arch = "wasm32"))]
     bytes: Arc<Vec<u8>>,
+    #[cfg(not(target_arch = "wasm32"))]
     config: RenderConfig,
     _workers: Mutex<Vec<JoinHandle<()>>>,
     stuck_after: std::time::Duration,
@@ -735,14 +742,18 @@ impl RenderPool {
     fn with_mode(bytes: Arc<Vec<u8>>, threads: usize, config: RenderConfig, inline: bool) -> Self {
         let threads = if inline || cfg!(target_arch = "wasm32") { 0 } else { threads.max(1) };
         let shared = Arc::new(Shared::default());
+        #[cfg(not(target_arch = "wasm32"))]
         let results_tx = shared.queue.clone();
         let results = ResultReceiver(shared.queue.clone());
         let mut pool = Self {
             shared,
             wake: Mutex::new(Vec::new()),
             results,
+            #[cfg(not(target_arch = "wasm32"))]
             results_tx,
+            #[cfg(not(target_arch = "wasm32"))]
             bytes: bytes.clone(),
+            #[cfg(not(target_arch = "wasm32"))]
             config: config.clone(),
             _workers: Mutex::new(Vec::new()),
             stuck_after: STUCK_AFTER,
@@ -3131,7 +3142,7 @@ trailer << /Root 1 0 R >>
 
     /// A Highlight annotation without an appearance stream (common in older and generated files)
     /// was not drawn at all. Vendored hayro-interpret patch: its /QuadPoints are filled with /C at
-    /// /CA, blended with Multiply, as PdfCraft draws its own highlights (pdfcraft-annot); MuPDF,
+    /// /CA, blended with Multiply, as Command PDF draws its own highlights (pdfcraft-annot); MuPDF,
     /// Poppler and PDFium draw these fixtures the same way. An /AP still wins, malformed
     /// /QuadPoints or no /C draw nothing, and Hidden, NoView and "Hide all comments" still apply.
     #[test]

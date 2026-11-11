@@ -1,0 +1,16 @@
+{
+  "name": "command-pdf-pilot",
+  "region": "nyc",
+  "static_sites": [{
+    "name": "editor",
+    "git": {
+      "repo_clone_url": "https://github.com/jshopkins3/pdfcraft.git",
+      "branch": "main"
+    },
+    "environment_slug": "html",
+    "source_dir": "apps/pdfcraft-web",
+    "output_dir": "site",
+    "build_command": "bash ../../packaging/web/prepare-static.sh",
+    "index_document": "index.html"
+  }]
+}

@@ -1,0 +1,203 @@
+name: Command PDF pilots
+on:
+  push:
+    branches: [main, feat/command-pdf-windows-pilot, feat/command-pdf-web-pilot]
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: command-pdf-pilot-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  windows:
+    if: github.ref == 'refs/heads/feat/command-pdf-windows-pilot'
+    runs-on: windows-2025
+    timeout-minutes: 100
+    env:
+      CARGO_BUILD_JOBS: 4
+      CARGO_PROFILE_RELEASE_LTO: 'false'
+      CARGO_PROFILE_RELEASE_CODEGEN_UNITS: 16
+      CARGO_TARGET_X86_64_PC_WINDOWS_MSVC_RUSTFLAGS: -C target-feature=+crt-static
+      PDFCRAFT_REQUIRE_WINRES: 1
+      PDFCRAFT_SYSTEM_FONTS: 0
+      PDFCRAFT_BUILD_LABEL: MCM pilot 1
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          repository: storytold/craft-fonts
+          ref: 3d9ab3a132ed0eff457e424226a435a901da30d3
+          path: craft-fonts
+      - uses: dtolnay/rust-toolchain@686976e191b89faba57d3206551f0f330d8cb249
+        with:
+          toolchain: '1.95.0'
+          components: rustfmt, clippy
+      - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6
+        with:
+          key: command-pdf-x64
+          cache-on-failure: true
+      - name: Configure optional fonts and installer tools
+        shell: pwsh
+        run: |
+          "CRAFT_FONTS_DIR=$env:GITHUB_WORKSPACE/craft-fonts" >> $env:GITHUB_ENV
+          dotnet tool install --global wix --version 5.0.2
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: Check committed source formatting
+        shell: pwsh
+        run: |
+          cargo fmt --all -- --check
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          git diff --binary --output=format.patch
+      - name: Validate asset provenance and layering
+        shell: pwsh
+        run: |
+          cargo xtask assets --write
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          git diff --exit-code -- ATTRIBUTION.md
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          cargo xtask assets
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          cargo xtask layers
+          exit $LASTEXITCODE
+      - name: Build x64 app, CLI and installer; inspect compiled MSI
+        shell: pwsh
+        run: |
+          ./packaging/windows/package.ps1 -Arch x64
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: Installer lifecycle and independent PDF smoke test
+        shell: pwsh
+        run: ./packaging/windows/pilot-acceptance.ps1
+      - name: Focused Rust checks
+        shell: pwsh
+        run: |
+          cargo test --release --target x86_64-pc-windows-msvc --locked -p pdfcraft -p pdfcraft-engine -p pdfcraft-automation -j 2
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          $linkListing = & cargo test --release --target x86_64-pc-windows-msvc --locked -p pdfcraft-ui-egui --test ui_group links:: -j 2 -- --list
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          Write-Output $linkListing
+          $selectedLinks = @($linkListing | Where-Object { $_ -match '^links::.+: test$' })
+          if ($selectedLinks.Count -lt 5) { throw "Expected at least five interface-link tests; selected $($selectedLinks.Count)" }
+          cargo test --release --target x86_64-pc-windows-msvc --locked -p pdfcraft-ui-egui --test ui_group links:: -j 2 -- --test-threads=1
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          cargo clippy --release --target x86_64-pc-windows-msvc --locked -p pdfcraft -p pdfcraft-ui-egui -p pdfcraft-engine -p pdfcraft-automation --all-targets -j 2 -- -D warnings
+          exit $LASTEXITCODE
+      - name: Collect reproducible candidate receipt
+        if: always()
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force dist/release | Out-Null
+          git rev-parse HEAD | Set-Content dist/release/source-commit.txt
+          rustc --version | Set-Content dist/release/toolchain.txt
+          Copy-Item format.patch dist/release/ -ErrorAction SilentlyContinue
+          Copy-Item ATTRIBUTION.md dist/release/ -ErrorAction SilentlyContinue
+          Get-ChildItem dist/release -File | Where-Object { $_.Extension -in '.msi','.zip' } | ForEach-Object {
+            $h=Get-FileHash $_.FullName -Algorithm SHA256
+            "$($h.Hash.ToLowerInvariant())  $($_.Name)"
+          } | Set-Content dist/release/SHA256SUMS.txt
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        if: always()
+        with:
+          name: command-pdf-x64-pilot-candidate
+          path: dist/release/
+          retention-days: 30
+
+  metadata:
+    if: github.ref == 'refs/heads/feat/command-pdf-web-pilot' || github.ref == 'refs/heads/main'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - uses: dtolnay/rust-toolchain@686976e191b89faba57d3206551f0f330d8cb249
+        with:
+          toolchain: '1.95.0'
+      - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6
+        with:
+          key: command-pdf-metadata
+      - name: Check layering and committed asset provenance
+        id: assets
+        continue-on-error: true
+        run: |
+          cargo xtask layers
+          cargo xtask assets --write
+          cargo xtask assets
+          git diff --binary -- ATTRIBUTION.md > attribution.patch
+          test ! -s attribution.patch
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        if: always()
+        with:
+          name: command-pdf-web-metadata
+          path: |
+            attribution.patch
+            ATTRIBUTION.md
+          retention-days: 14
+      - name: Require committed asset attribution
+        if: steps.assets.outcome == 'failure'
+        run: exit 1
+
+  browser:
+    needs: metadata
+    if: github.ref == 'refs/heads/feat/command-pdf-web-pilot' || github.ref == 'refs/heads/main'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    env:
+      CARGO_BUILD_JOBS: 4
+      CARGO_PROFILE_RELEASE_LTO: 'false'
+      CARGO_PROFILE_RELEASE_CODEGEN_UNITS: 16
+      CARGO_PROFILE_DEV_DEBUG: '0'
+      CARGO_PROFILE_TEST_DEBUG: '0'
+      PDFCRAFT_BUILD_LABEL: MCM.web.pilot.1
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - name: Record runner capacity
+        run: |
+          df -h .
+          free -h
+          ps -eo pid,comm,pcpu,pmem --sort=-pcpu | head -12
+      - uses: dtolnay/rust-toolchain@686976e191b89faba57d3206551f0f330d8cb249
+        with:
+          toolchain: '1.95.0'
+          targets: wasm32-unknown-unknown
+          components: rustfmt, clippy
+      - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6
+        with:
+          key: command-pdf-web
+          cache-on-failure: true
+      - name: Install pinned Trunk
+        run: |
+          curl -fsSLO https://github.com/trunk-rs/trunk/releases/download/v0.22.1/trunk-x86_64-unknown-linux-gnu.tar.gz
+          curl -fsSLO https://github.com/trunk-rs/trunk/releases/download/v0.22.1/trunk-x86_64-unknown-linux-gnu.tar.gz.sha256
+          expected=$(tr -d '[:space:]' < trunk-x86_64-unknown-linux-gnu.tar.gz.sha256)
+          [[ "$expected" =~ ^[a-fA-F0-9]{64}$ ]]
+          echo "$expected  trunk-x86_64-unknown-linux-gnu.tar.gz" | sha256sum -c -
+          mkdir -p "$RUNNER_TEMP/trunk"
+          tar -xzf trunk-x86_64-unknown-linux-gnu.tar.gz -C "$RUNNER_TEMP/trunk"
+          echo "$RUNNER_TEMP/trunk" >> "$GITHUB_PATH"
+      - name: Check formatting
+        id: format
+        continue-on-error: true
+        run: |
+          cargo fmt --all -- --check || { cargo fmt --all; git diff --binary > format.patch; exit 1; }
+      - name: Check browser and engine with Clippy
+        run: cargo clippy --locked --target wasm32-unknown-unknown -p pdfcraft-web -p pdfcraft-engine -j 4 -- -D warnings
+      - name: Test export archive and existing engine behavior
+        run: cargo test --locked -p pdfcraft-engine -j 4
+      - name: Build branded browser candidate
+        run: bash packaging/web/package.sh
+      - name: Record candidate source
+        if: always()
+        run: |
+          mkdir -p dist/release
+          git rev-parse HEAD > dist/release/source-commit.txt
+          rustc --version > dist/release/toolchain.txt
+          if test -f format.patch; then cp format.patch dist/release/; fi
+          if test -s attribution.patch; then cp attribution.patch dist/release/; fi
+          find dist/release -maxdepth 1 -name '*.zip' -exec sha256sum {} \; > dist/release/SHA256SUMS.txt
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        if: always()
+        with:
+          name: command-pdf-web-candidate
+          path: dist/release/
+          retention-days: 14
+      - name: Require committed formatting
+        if: steps.format.outcome == 'failure'
+        run: exit 1

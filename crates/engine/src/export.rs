@@ -8,6 +8,64 @@ use pdfcraft_render::{PageRenderer, RenderRequest, RequestKind};
 
 use crate::Document;
 
+/// One bounded archive for browser multi-file exports. A browser may silently block the
+/// second automatic download. Keep every named result together without changing its bytes.
+pub fn browser_download_bundle<B: std::borrow::Borrow<Vec<u8>>>(files: &[(String, B)]) -> Result<Vec<u8>, String> {
+    if files.is_empty() || files.len() > 1000 {
+        return Err("Choose between 1 and 1000 files for one download".into());
+    }
+    let mut total = 0usize;
+    let mut names = std::collections::HashSet::new();
+    for (name, data) in files {
+        let data = data.borrow();
+        if name.is_empty() || name.len() > 255 || name.contains(['/', '\\', '\0']) || name == "." || name == ".." || !names.insert(name) {
+            return Err("The download has an invalid or repeated file name".into());
+        }
+        total = total.checked_add(data.len()).ok_or("The download is too large")?;
+        if total > 256 * 1024 * 1024 {
+            return Err("Split this export into downloads smaller than 256 MB".into());
+        }
+    }
+    // Bounds above keep counts, offsets and name lengths inside this non-ZIP64 writer.
+    let mut archive = pdfcraft_export::Zip::default();
+    for (name, data) in files {
+        archive.add(name, data.borrow(), false);
+    }
+    Ok(archive.finish())
+}
+
+#[cfg(test)]
+mod browser_bundle_tests {
+    use super::browser_download_bundle;
+
+    #[test]
+    fn bundles_every_file_without_altering_bytes() {
+        let files = vec![("page 1.pdf".into(), b"first PDF bytes".to_vec()), ("page 2.pdf".into(), b"second PDF bytes".to_vec())];
+        let bytes = browser_download_bundle(&files).unwrap();
+        assert!(bytes.starts_with(b"PK\x03\x04"));
+        for (name, data) in files {
+            assert_eq!(bytes.windows(name.len()).filter(|w| *w == name.as_bytes()).count(), 2);
+            assert_eq!(bytes.windows(data.len()).filter(|w| *w == data).count(), 1);
+        }
+        assert_eq!(u16::from_le_bytes(bytes[bytes.len() - 12..bytes.len() - 10].try_into().unwrap()), 2);
+    }
+
+    #[test]
+    fn accepts_shared_browser_buffers_without_copying_them() {
+        let bytes = std::sync::Arc::new(b"shared PDF bytes".to_vec());
+        let bundle = browser_download_bundle(&[("page.pdf".into(), bytes.clone())]).unwrap();
+        assert!(bundle.windows(bytes.len()).any(|window| window == bytes.as_slice()));
+        assert_eq!(std::sync::Arc::strong_count(&bytes), 1);
+    }
+
+    #[test]
+    fn rejects_unsafe_duplicate_or_unbounded_entries() {
+        for files in [vec![], vec![("../escape.pdf".into(), vec![])], vec![("same.pdf".into(), vec![]); 2], vec![("x.pdf".into(), vec![]); 1001]] {
+            assert!(browser_download_bundle(&files).is_err());
+        }
+    }
+}
+
 /// Renders and extracts pages of one document state.
 pub struct Exporter {
     renderer: PageRenderer,
@@ -28,7 +86,7 @@ pub struct ExportSource {
 
 impl Document {
     /// What an export reads, for exporting on another thread. These are the displayed
-    /// bytes, so they may carry missing comment appearances PdfCraft drew. Signature
+    /// bytes, so they may carry missing comment appearances Command PDF drew. Signature
     /// artwork stays original; viewer validation badges are not document content and
     /// do not enter image/text exports or Print as Image. Saving uses the working file.
     pub fn export_source(&self) -> ExportSource {

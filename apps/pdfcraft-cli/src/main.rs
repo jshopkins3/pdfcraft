@@ -1,4 +1,4 @@
-//! pdfcraft-cli — headless PdfCraft.
+//! pdfcraft-cli — headless Command PDF.
 //!
 //! Usage: `pdfcraft-cli --help`, which prints `USAGE` below.
 //!
